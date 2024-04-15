@@ -1,0 +1,238 @@
+---
+title: "BODY-MEASUREMENT DASHBOARD"
+author: "MOHAMMAD KAVISH"
+date: " `r Sys.Date()`"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+
+
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(plotly)
+library(flexdashboard)
+library(ggplot2)
+library(tidyr)
+body_data <- read.csv("E:/R PROGRAMMING/bdims.csv")
+```
+# OVERVIEW
+## Column 1{data-width=500}
+### Objective
+The objective of the Body Measurement Dashboard project is to provide a comprehensive and visually engaging platform for exploring anthropometric data. By leveraging R Markdown and Flexdashboard, the project aims to offer users an intuitive interface to analyze correlations and patterns in body measurements, including age, weight, height, and sex. Through interactive visualizations and descriptive statistics, the dashboard seeks to uncover insights into demographic trends, such as age-related weight changes and gender-based variations in body dimensions. Ultimately, the goal is to empower users, whether researchers, healthcare professionals, or individuals interested in personal health, to gain valuable insights and make informed decisions based on the data presented. The dashboard's user-friendly interface and informative visuals aim to facilitate data exploration and promote a deeper understanding of human body composition dynamics.
+
+### Key Findings
+* The scatter plot of age vs. weight by sex reveals...
+* The distribution of height histogram shows...
+* The height distribution by sex box plot highlights...
+* Line Chart of Average Weight by Age...
+* Pie Chart for Sex Distribution...
+* Bar Chart of Body Measurement by Sex...
+
+
+### Acknowledgments
+**We would like to acknowledge MOHAMMAD KAVISH  for their valuable input and support throughout the project.**
+**Additionally, we are grateful to Zeenat Zahra Ma'am for their support.**
+
+# DATA STATS
+## Column 1{data-width=500}
+To analyze this dataset, we first need to identify its structure and the variables it contains. From what I can see, the dataset consists of several columns:
+
+bia_di, bii_di, bit_di, che_de, che_di, elb_di, wri_di, kne_di, ank_di: These seem to be measurements of different body parts.
+sho_gi, che_gi, wai_gi, nav_gi, hip_gi, thi_gi, bic_gi, for_gi, kne_gi, cal_gi, ank_gi, wri_gi: These seem to be measurements of girths of different body parts.
+age, wgt, hgt, sex: These seem to be age, weight, height, and sex of the individuals.
+Let's start by calculating some basic statistics for each variable:
+
+### Descriptive statistics:
+
+* Mean
+* Standard deviation
+* Minimum
+* 25th percentile (Q1)
+* Median (50th percentile or Q2)
+* 75th percentile (Q3)
+* Maximum
+## Column 2{data-width=500}
+### Correlation matrix: This will help us understand the relationships between different variables.
+
+Let's proceed with calculating these statistics.
+
+To analyze this dataset, let's start by summarizing the statistics for each variable:
+
+* Bia_di to Wri_di: These variables seem to represent various body dimensions (e.g., biceps, waist, etc.).
+* Sho_gi to Wri_gi: These variables seem to represent girth measurements of different body parts.
+* Age, Weight (wgt), Height (hgt): These are self-explanatory.
+* Sex: This likely represents the sex of the individuals in the dataset.
+
+### Here are some descriptive statistics for the numerical variables:
+
+* Age: Mean age is approximately 21.35 years, with a standard deviation of about 2.55 years.
+* Weight (wgt): Mean weight is around 76.54 kg, with a standard deviation of roughly 8.51 kg.
+* Height (hgt): Mean height is approximately 175.35 cm, with a standard deviation of about 5.71 cm.
+
+
+
+# Visulisation chart {data-navmenu="DASHBOARD"}
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Scatter Plot of Age vs. Weight by Sex
+
+```{r}
+ggplot(body_data, aes(x = age, y = wgt, color = sex)) +
+  geom_point() +
+  labs(x = "Age", y = "Weight", color = "Sex")
+plotly::ggplotly()
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Distribution of Height
+
+```{r}
+ggplot(body_data, aes(x = hgt)) +
+  geom_histogram(binwidth = 5) +
+  labs(x = "Height", y = "Frequency")
+plotly::ggplotly()
+```
+
+### Height Distribution by Sex
+
+```{r}
+ggplot(body_data, aes(x = sex, y = hgt, fill = factor(sex))) +
+  geom_boxplot() +
+  labs(x = "Sex", y = "Height")
+plotly::ggplotly()
+```
+# Additional chart {data-navmenu="DASHBOARD"}
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Line Chart of Average Weight by Age
+
+```{r}
+ggplot(body_data, aes(x = age, y = wgt, group = sex)) +
+  geom_line(aes(color = sex)) +
+  geom_point(aes(color = sex)) +
+  labs(x = "Age", y = "Average Weight", color = "Sex")
+plotly::ggplotly()
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Pie chart for sex distribution
+
+```{r}
+body_data %>%
+  count(sex) %>%
+  ggplot(aes(x = "", y = n, fill = sex)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  theme_void() +
+  labs(fill = "Sex")
+
+
+```
+
+
+### Bar Chart of Body Measurement by Sex
+
+
+```{r}
+
+body_data %>%
+  group_by(sex) %>%
+  summarise(avg_bia_di = mean(bia_di),
+            avg_che_di = mean(che_di),
+            avg_wai_di = mean(wri_di)) %>%
+  pivot_longer(cols = c(avg_bia_di, avg_che_di, avg_wai_di), names_to = "Measurement", values_to = "Average") %>%
+  ggplot(aes(x = sex, y = Average, fill = Measurement)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  labs(x = "Sex", y = "Average Body Measurement", fill = "Measurement") +
+  theme_minimal()
+plotly::ggplotly()
+```
+
+
+
+
+# About
+
+This section provides detailed explanations of the charts displayed in the dashboard, along with the R functions used to create them.
+
+## Scatter Plot of Age vs. Weight by Sex
+
+**Description:**
+The scatter plot visualizes the relationship between age and weight, segmented by sex. Each point represents an individual's age and weight, with different colors indicating different sexes.
+
+**R Functions:**
+- `ggplot`: Creates the initial plot.
+- `aes`: Specifies the aesthetic mappings.
+- `geom_point`: Adds points to the plot.
+- `labs`: Sets the labels for x-axis, y-axis, and legend.
+
+## Distribution of Height
+
+**Description:**
+This histogram illustrates the frequency distribution of heights within the dataset. Each bar represents a range of heights, and the height of the bar indicates the frequency of individuals within that range.
+
+**R Functions:**
+- `ggplot`: Creates the initial plot.
+- `aes`: Specifies the aesthetic mappings.
+- `geom_histogram`: Constructs the histogram.
+- `labs`: Sets the labels for x-axis and y-axis.
+
+## Height Distribution by Sex
+
+**Description:**
+The box plot compares the distribution of heights between different sexes. It provides insights into the central tendency, spread, and skewness of height distributions for males and females.
+
+**R Functions:**
+- `ggplot`: Creates the initial plot.
+- `aes`: Specifies the aesthetic mappings.
+- `geom_boxplot`: Constructs the box plot.
+- `labs`: Sets the labels for x-axis, y-axis, and legend.
+
+## Line Chart of Average Weight by Age
+
+**Description:**
+This line chart depicts the trend of average weight across different age groups, segmented by sex. It allows for the observation of weight changes over time for males and females.
+
+**R Functions:**
+- `ggplot`: Creates the initial plot.
+- `aes`: Specifies the aesthetic mappings.
+- `geom_line`: Adds lines connecting data points.
+- `geom_point`: Adds points to the plot.
+- `labs`: Sets the labels for x-axis, y-axis, and legend.
+
+## Pie Chart for Sex Distribution
+
+**Description:**
+The pie chart provides an overview of the distribution of sexes within the dataset. Each slice of the pie represents a proportion of males or females.
+
+**R Functions:**
+- `ggplot`: Creates the initial plot.
+- `aes`: Specifies the aesthetic mappings.
+- `geom_bar`: Constructs the bar chart.
+- `coord_polar`: Converts the Cartesian coordinates to polar coordinates.
+
+## Bar Chart of Body Measurement by Sex
+
+**Description:**
+This bar chart compares the average body measurements (e.g., biceps, chest, waist) between different sexes. It allows for a visual comparison of body dimensions for males and females.
+
+**R Functions:**
+- `ggplot`: Creates the initial plot.
+- `aes`: Specifies the aesthetic mappings.
+- `geom_bar`: Constructs the bar chart.
+- `summarise`: Computes summary statistics (e.g., mean) by group.
+- `pivot_longer`: Restructures the data from wide to long format.
+- `labs`: Sets the labels for x-axis, y-axis, and legend.
+
